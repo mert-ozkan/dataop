@@ -1,4 +1,4 @@
-function pairN = get_closest_integer_dividers(num)
+function pairN = find_closest_integer_divisor_pair(num)
 
 assert(isscalar(num) & isnumeric(num) & rem(num,1)==0, "num must be an integer!");
 
@@ -7,6 +7,6 @@ pairs = vertcat(pairs{:});
 pairs = sort(pairs,2);
 isInt = ~any(rem(pairs,1),2);
 pairs = pairs(isInt,:);
-pairN = pairs(gen.absargmin(diff(pairs,[],2)),:);
+pairN = pairs(do.argmin(abs(diff(pairs,[],2))),:);
 
 end

@@ -1,5 +1,5 @@
 function i = ifwithin(varargin)
 
-i = gen.ifinrange(varargin{:});
+i = do.ifinrange(varargin{:});
 
 end
