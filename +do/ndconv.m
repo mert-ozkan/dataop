@@ -31,8 +31,8 @@ function C = ndconv(arr, kernel, options)
 arguments
     arr double
     kernel double
-    options.Pattern string {mustBeMember(options.Pattern, ["constant", "replicate", "symmetric", "circular"])} = "constant"
-    options.FillValue double {mustBeScalarOrEmpty} = 0
+    options.Pattern string {mustBeMember(options.Pattern, ["constant", "replicate", "symmetric", "circular"])}
+    options.FillValue double {mustBeScalarOrEmpty}
 end
 
 % Determine the maximum number of dimensions to consider
@@ -59,8 +59,8 @@ paddingArgs = namedargs2cell(options);
 % We must do this to support asymmetric padding for even-sized kernels,
 % as paddata(..., 'both') is always symmetric.
 % Use 'Side', 'leading' for 'pre' and 'Side', 'trailing' for 'post'.
-arr_padded = paddata(arr, pad_pre, 'Side', 'leading', paddingArgs{:});
-arr_padded = paddata(arr_padded, pad_post, 'Side', 'trailing', paddingArgs{:});
+arr_padded = paddata(arr, size(arr) + pad_pre, 'Side', 'leading', paddingArgs{:});
+arr_padded = paddata(arr_padded, size(arr_padded) + pad_post, 'Side', 'trailing', paddingArgs{:});
 
 % Perform convolution only on the 'valid' part.
 % The size of arr_padded is (size(arr) + pad_size_total).
