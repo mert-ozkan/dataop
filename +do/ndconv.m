@@ -1,8 +1,8 @@
-function C = ndconv(arr, kernel, options)
+function C = ndconv(arr, kernel, padval)
 % NDCONV N-Dimensional convolution with custom padding.
-%   C = NDCONV(arr, kernel, Name, Value, ...) performs N-D convolution
+%   C = NDCONV(arr, kernel, padval) performs N-D convolution
 %   of arrays arr and kernel. It is a wrapper for:
-%       arr_padded = paddata(arr, ...);
+%       arr_padded = padarray(arr, ...);
 %       C = convn(arr_padded, kernel, 'valid');
 %
 %   This allows using 'convn' with 'replicate', 'symmetric', or
@@ -12,27 +12,17 @@ function C = ndconv(arr, kernel, options)
 %       arr (double): The N-D array to be filtered.
 %       kernel (double): The N-D convolution kernel.
 %
-%   Name-Value Pairs (passed directly to paddata):
-%       'Pattern' (string): The padding method.
-%           Options: "constant", "replicate", "symmetric", "circular"
-%           Default: "constant"
-%
-%       'FillValue' (double): The constant value to use when
-%           Pattern="constant".
-%           Default: 0
-%
 %   Example:
 %       % Convolve with 'replicate' padding
-%       C = ndconv(myArray, myKernel, 'Pattern', 'replicate');
+%       C = ndconv(myArray, myKernel, 'replicate');
 %
 %       % Convolve with NaN padding
-%       C = ndconv(myArray, myKernel, 'Pattern', 'constant', 'FillValue', NaN);
+%       C = ndconv(myArray, myKernel, NaN);
 
 arguments
     arr double
     kernel double
-    options.Pattern string {mustBeMember(options.Pattern, ["constant", "replicate", "symmetric", "circular"])}
-    options.FillValue double {mustBeScalarOrEmpty}
+    padval = NaN
 end
 
 % Determine the maximum number of dimensions to consider
@@ -51,16 +41,12 @@ pad_size_total = sz_k - 1;
 pad_pre = floor(pad_size_total / 2);
 pad_post = pad_size_total - pad_pre;
 
-% Convert the options struct to a cell array for paddata
-% This will be {'Pattern', 'replicate'} or {'Pattern', 'constant', 'FillValue', 0}
-paddingArgs = namedargs2cell(options);
-
 % Pad the array twice: once for 'pre' and once for 'post'
 % We must do this to support asymmetric padding for even-sized kernels,
 % as paddata(..., 'both') is always symmetric.
 % Use 'Side', 'leading' for 'pre' and 'Side', 'trailing' for 'post'.
-arr_padded = paddata(arr, size(arr) + pad_pre, 'Side', 'leading', paddingArgs{:});
-arr_padded = paddata(arr_padded, size(arr_padded) + pad_post, 'Side', 'trailing', paddingArgs{:});
+arr_padded = padarray(arr, pad_pre, padval, 'pre');
+arr_padded = padarray(arr_padded, pad_post, padval, 'post');
 
 % Perform convolution only on the 'valid' part.
 % The size of arr_padded is (size(arr) + pad_size_total).
